@@ -1,0 +1,11 @@
+{
+  "name": "punto-y-letra-pwa",
+  "version": "1.0.0",
+  "description": "Prototipo PWA para la gestión de inventario de Punto y Letra S.A.C.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "author": "David Mantari, Dario Ramirez",
+  "license": "MIT"
+}

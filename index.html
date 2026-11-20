@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de inventario y asistente para Librería y Papelería Punto y Letra S.A.C.">
+    <meta name="theme-color" content="#0b2240">
+    <title>Librería y Papelería Punto y Letra S.A.C.</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">
+            <i class="fa-solid fa-boxes-stacked"></i> Librería y Papelería Punto y Letra S.A.C.
+        </div>
+        <div class="user-info">
+            <span><i class="fa-solid fa-wifi"></i> Modo Demo</span>
+            <span><i class="fa-solid fa-user"></i> David (Propietario)</span>
+            <a href="#" class="btn-logout" onclick="reiniciarDemo(); return false;">Reiniciar demo</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-btn active" data-tab="inventario" onclick="showTab('inventario', this)">Inventario</button>
+        <button class="nav-btn" data-tab="venta" onclick="showTab('venta', this)">Registrar venta</button>
+        <button class="nav-btn" data-tab="chat" onclick="showTab('chat', this)">Asistente WhatsApp</button>
+        <button class="nav-btn" data-tab="pronostico" onclick="showTab('pronostico', this)">Pronóstico ML</button>
+    </nav>
+
+    <main class="content">
+        <section id="tab-inventario" class="tab-content active">
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>Productos en catálogo</h3>
+                    <p class="stat-number" id="stat-total">0</p>
+                </div>
+                <div class="card">
+                    <h3>En alerta de reposición</h3>
+                    <p class="stat-number text-warning" id="stat-alertas">0</p>
+                </div>
+                <div class="card">
+                    <h3>Valor del inventario (S/)</h3>
+                    <p class="stat-number" id="stat-valor">S/ 0.00</p>
+                </div>
+                <div class="card">
+                    <h3>Precisión del pronóstico (MAPE)</h3>
+                    <p class="stat-number">9.4 %</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Consulta de existencias</h2>
+                    <input type="text" id="search-input" placeholder="Buscar por código, nombre o categoría..." class="search-bar" oninput="filtrarInventario()">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>PRODUCTO</th>
+                            <th>CATEGORÍA</th>
+                            <th>DISPONIBLE</th>
+                            <th>MÍNIMO</th>
+                            <th>PRECIO</th>
+                            <th>ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-venta" class="tab-content">
+            <div class="form-container">
+                <div class="form-card">
+                    <h2>Registrar venta</h2>
+                    <p class="subtitle">Regla de negocio: la venta descuenta stock en la misma operación y se bloquea si la cantidad supera el disponible.</p>
+                    <div class="input-group">
+                        <label for="venta-producto">Producto</label>
+                        <select id="venta-producto"></select>
+                    </div>
+                    <div class="input-group">
+                        <label for="venta-cantidad">Cantidad</label>
+                        <input type="number" id="venta-cantidad" value="1" min="1">
+                    </div>
+                    <button class="btn-primary" onclick="registrarVenta()">Confirmar venta</button>
+                    <p id="venta-mensaje" class="message"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-chat" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-box" id="chat-box">
+                    <div class="message-bubble received">
+                        <p>Hola, ¿tienen colores de 24 unidades? ¿Y cuánto cuestan?</p>
+                    </div>
+                    <div class="message-bubble sent">
+                        <p>Tenemos 12 u. en Colores Faber-Castell x24. Precio: S/ 15.50 c/u. ¿Te lo separamos?</p>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-message" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
+                    <button onclick="enviarMensaje()">Enviar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-pronostico" class="tab-content">
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>MAPE del modelo</h3>
+                    <p class="stat-number">9.4 %</p>
+                </div>
+                <div class="card">
+                    <h3>MAPE de la referencia</h3>
+                    <p class="stat-number">10.1 %</p>
+                </div>
+                <div class="card">
+                    <h3>Compra sugerida</h3>
+                    <p class="stat-number">10 u</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Punto de reorden predictivo (ROP)</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PRODUCTO</th>
+                            <th>DEMANDA ESTIMADA</th>
+                            <th>STOCK ACTUAL</th>
+                            <th>ROP</th>
+                            <th>COMPRA SUGERIDA</th>
+                            <th>ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pronostico-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
